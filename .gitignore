@@ -31,3 +31,5 @@
 # Debug files
 *.dSYM/
 *.su
+/empty/Debug
+/empty/.settings
