@@ -12,13 +12,13 @@ ENTRY(_start)
 
 SECTIONS
 {
-	.vectors : ALIGN(41)
+	.vectors : ALIGN(0x000)
 	{
 		FILL(0xFF)
 		KEEP(*(.vectors))  
 	}>rom
 	
-    .text : ALIGN(4)
+    .text : ALIGN(0x400)
     {
         . = ALIGN(4);
         _stext = .;

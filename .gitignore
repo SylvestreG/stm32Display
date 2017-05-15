@@ -33,3 +33,6 @@
 *.su
 /empty/Debug
 /empty/.settings
+build/*
+*~
+

@@ -12,7 +12,6 @@ void kern_main(void)
 
 	while (true)
 	{
-		__asm__("BKPT");
 		i++;
 	}
 }

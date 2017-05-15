@@ -6,7 +6,7 @@
 #define NB_IRQ		20
 
 struct cortex_m3_vector {
-	uint32_t *sp;
+	uint32_t sp;
 	void (*reset)(void);
 	void (*nmi)(void);
 	void (*hardfault)(void);

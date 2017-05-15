@@ -2,7 +2,7 @@
 #include <kernel.h>
 
 void _start(void);
-#define STACK_TOP 0x20014000 // just a tiny stack for demo
+#define STACK_TOP 0x20004000 // just a tiny stack for demo
 
 static void
 nmi_handler(void)
@@ -23,7 +23,7 @@ _start(void)
 }
 
 volatile struct cortex_m3_vector vectors __attribute__ ((section(".vectors"))) = {
-	.sp = (uint32_t *) STACK_TOP,
+	.sp = STACK_TOP,
 	.reset = _start,
 	.nmi = nmi_handler,
 	.hardfault = hardfault_handler
