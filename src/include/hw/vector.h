@@ -1,7 +1,7 @@
 #ifndef __VECTOR_H__
 #define __VECTOR_H__
 
-#include <sys/types.h>
+#include <types.h>
 
 #define NB_IRQ		20
 

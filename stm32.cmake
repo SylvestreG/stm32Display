@@ -15,6 +15,6 @@ set(CMAKE_DEBUGER arm-none-eabi-gdb)
 set(CMAKE_CPPFILT arm-none-eabi-c++filt)
 
 set(CMAKE_C_FLAGS "-mthumb -fno-builtin -mcpu=cortex-m3 -Wall -Wextra -Werror -std=c99 -nostdinc -g -g3")
-set(CMAKE_CXX_FLAGS "-mthumb -fno-builtin -mcpu=cortex-m3 -Wall -Wextra -Werror -std=c++11 -nostdinc")
+set(CMAKE_CXX_FLAGS "-mthumb -fno-builtin -mcpu=cortex-m3 -Wall -Wextra -Werror -std=c++11 -nostdinc -fno-exceptions")
 set(CMAKE_ASM_FLAGS "-mthumb -fno-builtin -x assembler-with-cpp")
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,--gc-sections -mthumb -mcpu=cortex-m3 -mabi=aapcs -nostdlib")

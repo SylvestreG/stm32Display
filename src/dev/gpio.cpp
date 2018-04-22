@@ -49,7 +49,7 @@ static struct gpio_reg *get_ip(gpio_bank bank)
 		rcc_enable_ahb_periph_clock(AhbPeriphClockGpioH);
 		break;
 	default:
-		gpio = NULL;
+		gpio = (struct gpio_reg *)NULL;
 		break;
 	}
 

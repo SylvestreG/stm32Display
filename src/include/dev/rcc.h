@@ -1,7 +1,7 @@
 #ifndef __RCC_H__
 #define __RCC_H__
 
-#include <sys/types.h>
+#include <types.h>
 
 #pragma pack(push,1)
 struct rcc_reg {

@@ -1,7 +1,7 @@
 #ifndef __GPIO_H__
 #define __GPIO_H__
 
-#include <sys/types.h>
+#include <types.h>
 
 #pragma pack(push,1)
 struct gpio_reg {

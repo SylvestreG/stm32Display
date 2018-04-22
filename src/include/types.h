@@ -12,7 +12,9 @@ typedef signed long long int int64_t;
 
 typedef uint32_t size_t;
 
+#ifndef __cplusplus
 typedef enum {false, true} bool;
+#endif
 
 #define NULL (void*)0
 
