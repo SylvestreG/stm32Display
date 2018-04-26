@@ -1,1 +1,2 @@
-add_library(minicpp   new.cpp)
+add_library(minicpp   new.cpp
+                      runtime.c)

@@ -1,14 +1,9 @@
 #include <vector>
+#include "dev/gpio.h"
 
-Vector<int> vec;
-Vector<char *> vec2;
+stm32::Gpio gpio2(stm32::Gpio::GpioBankB);
 
-Vector<char *> debug()
+void debug()
 {
-  Vector<char *> *p;
-  p = &vec2;
-
-  p = new Vector<char *>;
-
-  return *p;
+  return ;
 }

@@ -15,7 +15,8 @@ struct malloc_chunk
 
 static uint16_t free_slot_lookup(struct malloc_chunk *chunk);
 
-extern struct malloc_chunk *heap;
+static struct malloc_chunk *chunks;
+extern void *heap;
 extern size_t heap_size;
 
 void
@@ -24,18 +25,19 @@ malloc_init(void)
   size_t  memory_left;
   uint8_t *memory;
 
-  memory_left = heap_size - (NB_MALLOC_CHUNK * sizeof(*heap));
-  memory      = (uint8_t *)heap + NB_MALLOC_CHUNK * sizeof(*heap);
+  chunks = (struct malloc_chunk *)&heap;
+  memory_left = heap_size - (NB_MALLOC_CHUNK * sizeof(*chunks));
+  memory      = ((uint8_t *)&heap) + (NB_MALLOC_CHUNK * sizeof(*chunks));
 
   for(uint8_t i = 0; i < NB_MALLOC_CHUNK; i++) {
-    heap[i].chunk_size  = 4096 / ((i == 0) ? 1 : i * 2);
-    heap[i].nb_chunk    = (memory_left / NB_MALLOC_CHUNK) / heap[i].chunk_size;
+    chunks[i].chunk_size  = 4096 / ((i == 0) ? 1 : i * 2);
+    chunks[i].nb_chunk    = (memory_left / NB_MALLOC_CHUNK) / chunks[i].chunk_size;
 
-    heap[i].nb_allocated_chunk  = 0;
-    heap[i].first_free_chunk    = 0;
+    chunks[i].nb_allocated_chunk  = 0;
+    chunks[i].first_free_chunk    = 0;
 
-    heap[i].start       = memory;
-    memory              += heap[i].chunk_size * heap[i].nb_chunk;
+    chunks[i].start               = memory;
+    memory                        += chunks[i].chunk_size * chunks[i].nb_chunk;
   }
 }
 
@@ -51,17 +53,17 @@ void *malloc(size_t size)
       //log_error
   }
 
-  for(i = 0; (i < NB_MALLOC_CHUNK) && (size < heap[i+1].chunk_size); i++);
+  for(i = 0; (i < NB_MALLOC_CHUNK) && (size < chunks[i+1].chunk_size); i++);
 
-  if (heap[i].nb_allocated_chunk == heap[i].nb_chunk)
+  if (chunks[i].nb_allocated_chunk == chunks[i].nb_chunk)
   {
       //log_error
   }
 
-  allocated_slot = heap[i].start +
-    (heap[i].first_free_chunk + heap[i].chunk_size);
-  heap[i].nb_allocated_chunk++;
-  heap[i].first_free_chunk = free_slot_lookup(&heap[i]);
+  allocated_slot = chunks[i].start +
+    (chunks[i].first_free_chunk + chunks[i].chunk_size);
+  chunks[i].nb_allocated_chunk++;
+  chunks[i].first_free_chunk = free_slot_lookup(&chunks[i]);
 
   return allocated_slot;
 }

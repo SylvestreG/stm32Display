@@ -1,6 +1,23 @@
 #include <dev/gpio.h>
 #include <dev/rcc.h>
 
+using namespace stm32;
+
+#pragma pack(push,1)
+struct gpio_reg {
+	volatile uint32_t mode;
+	volatile uint32_t output_type;
+	volatile uint32_t output_speed;
+	volatile uint32_t pull_up_down;
+	volatile uint32_t input_data;
+	volatile uint32_t output_data;
+	volatile uint32_t bit_set_reset;
+	volatile uint32_t config_lock;
+	volatile uint32_t alternate_fn_high;
+	volatile uint32_t bit_reset;
+};
+#pragma pack(pop)
+
 #define GPIO_BANK_A_BASE_ADDR 0x40020000
 #define GPIO_BANK_B_BASE_ADDR 0x40020400
 #define GPIO_BANK_C_BASE_ADDR 0x40020800
@@ -10,66 +27,92 @@
 #define GPIO_BANK_F_BASE_ADDR 0x40021800
 #define GPIO_BANK_G_BASE_ADDR 0x40021C00
 
-static struct gpio_reg *get_ip(gpio_bank bank)
+Gpio::Gpio(Gpio::GpioBank bank) : _bank(bank)
 {
-	struct gpio_reg *gpio;
-
 	switch (bank)
 	{
-	case GpioBankA:
-		gpio = (struct gpio_reg *)GPIO_BANK_A_BASE_ADDR;
+	case Gpio::GpioBankA:
+		_bankRegisters = (struct gpio_reg *)GPIO_BANK_A_BASE_ADDR;
 		rcc_enable_ahb_periph_clock(AhbPeriphClockGpioA);
 		break;
-	case GpioBankB:
-		gpio = (struct gpio_reg *)GPIO_BANK_B_BASE_ADDR;
+	case Gpio::GpioBankB:
+		_bankRegisters = (struct gpio_reg *)GPIO_BANK_B_BASE_ADDR;
 		rcc_enable_ahb_periph_clock(AhbPeriphClockGpioB);
 		break;
-	case GpioBankC:
-		gpio = (struct gpio_reg *)GPIO_BANK_C_BASE_ADDR;
+	case Gpio::GpioBankC:
+		_bankRegisters = (struct gpio_reg *)GPIO_BANK_C_BASE_ADDR;
 		rcc_enable_ahb_periph_clock(AhbPeriphClockGpioC);
 		break;
-	case GpioBankD:
-		gpio = (struct gpio_reg *)GPIO_BANK_D_BASE_ADDR;
+	case Gpio::GpioBankD:
+		_bankRegisters = (struct gpio_reg *)GPIO_BANK_D_BASE_ADDR;
 		rcc_enable_ahb_periph_clock(AhbPeriphClockGpioD);
 		break;
-	case GpioBankE:
-		gpio = (struct gpio_reg *)GPIO_BANK_E_BASE_ADDR;
+	case Gpio::GpioBankE:
+		_bankRegisters = (struct gpio_reg *)GPIO_BANK_E_BASE_ADDR;
 		rcc_enable_ahb_periph_clock(AhbPeriphClockGpioE);
 		break;
-	case GpioBankF:
-		gpio = (struct gpio_reg *)GPIO_BANK_F_BASE_ADDR;
+	case Gpio::GpioBankF:
+		_bankRegisters = (struct gpio_reg *)GPIO_BANK_F_BASE_ADDR;
 		rcc_enable_ahb_periph_clock(AhbPeriphClockGpioF);
 		break;
-	case GpioBankG:
-		gpio = (struct gpio_reg *)GPIO_BANK_G_BASE_ADDR;
+	case Gpio::GpioBankG:
+		_bankRegisters = (struct gpio_reg *)GPIO_BANK_G_BASE_ADDR;
 		rcc_enable_ahb_periph_clock(AhbPeriphClockGpioG);
 		break;
-	case GpioBankH:
-		gpio = (struct gpio_reg *)GPIO_BANK_H_BASE_ADDR;
+	case Gpio::GpioBankH:
+		_bankRegisters = (struct gpio_reg *)GPIO_BANK_H_BASE_ADDR;
 		rcc_enable_ahb_periph_clock(AhbPeriphClockGpioH);
 		break;
 	default:
-		gpio = (struct gpio_reg *)NULL;
+		_bankRegisters = (struct gpio_reg *)NULL;
 		break;
 	}
-
-	return (gpio);
 }
 
-void gpio_set_mode(gpio_bank bank, uint8_t pin, gpio_mode mode)
+Gpio::~Gpio(void)
 {
-	struct gpio_reg *gpio;
+	switch(_bank)
+	{
+	case Gpio::GpioBankA:
+		rcc_disable_ahb_periph_clock(AhbPeriphClockGpioA);
+		break;
+	case Gpio::GpioBankB:
+		rcc_disable_ahb_periph_clock(AhbPeriphClockGpioB);
+		break;
+	case Gpio::GpioBankC:
+		rcc_disable_ahb_periph_clock(AhbPeriphClockGpioC);
+		break;
+	case Gpio::GpioBankD:
+		rcc_disable_ahb_periph_clock(AhbPeriphClockGpioD);
+		break;
+	case Gpio::GpioBankE:
+		rcc_disable_ahb_periph_clock(AhbPeriphClockGpioE);
+		break;
+	case Gpio::GpioBankF:
+		rcc_disable_ahb_periph_clock(AhbPeriphClockGpioF);
+		break;
+	case Gpio::GpioBankG:
+		rcc_disable_ahb_periph_clock(AhbPeriphClockGpioG);
+		break;
+	case Gpio::GpioBankH:
+		rcc_disable_ahb_periph_clock(AhbPeriphClockGpioH);
+		break;
+	default:
+		break;
+	}
+}
 
-	gpio = get_ip(bank);
-
+void
+Gpio::set_mode(uint8_t io, Gpio::GpioMode mode)
+{
 	switch (mode)
 	{
-	case GpioInput:
-		gpio->mode &= ~(0x3u << (pin * 2));
+	case Gpio::GpioInput:
+		_bankRegisters->mode &= ~(0x3u << (io * 2));
 		break;
-	case GpioOutput:
-		gpio->mode &= ~(0x3u << (pin * 2));
-		gpio->mode |= (0x1u << (pin * 2));
+	case Gpio::GpioOutput:
+		_bankRegisters->mode &= ~(0x3u << (io * 2));
+		_bankRegisters->mode |= (0x1u << (io * 2));
 		break;
 	default:
 		//TODO
@@ -77,21 +120,11 @@ void gpio_set_mode(gpio_bank bank, uint8_t pin, gpio_mode mode)
 	}
 }
 
-void gpio_set_value(gpio_bank bank, uint8_t pin, bool enable)
+void
+Gpio::set_value(uint8_t io, bool highLevel)
 {
-	struct gpio_reg *gpio;
-
-	gpio = get_ip(bank);
-
-	if (enable)
-		gpio->bit_set_reset = (0x1u << pin);
+	if(true == highLevel)
+		_bankRegisters->bit_set_reset = (0x1u << io);
 	else
-		gpio->bit_set_reset = (0x1u << pin) << 16;
+		_bankRegisters->bit_set_reset = (0x1u << io) << 16;
 }
-
-/*bool gpio_get_mode(gpio_bank bank, uint8_t pin)
-{
-	struct gpio_reg *gpio;
-
-	gpio = get_ip(bank);
-}*/

@@ -3,32 +3,56 @@
 #include <dev/gpio.h>
 #include <kernel.h>
 
-size_t heap_size = 0x10000;
-uint8_t heap[0x10000];
+#define HEAP_SIZE 0x10000
+
+extern "C" {
+void _init(void);
+void do_ctors(void);
+
+//data
+extern uint8_t *__data_start__;
+extern uint8_t *__data_size__;
+extern uint8_t *__data_loadaddr__;
+
+//bss
+extern uint8_t *__bss_start__;
+extern uint8_t *__bss_end__;
+extern size_t __bss_size__;
+
+};
+
+size_t heap_size = HEAP_SIZE;
+uint8_t heap[HEAP_SIZE];
+
+stm32::Gpio gpio(stm32::Gpio::GpioBankA);
+
+void cpp_runtime_enable(void)
+{
+  //init data + bss
+  memcpy(&__data_start__, &__data_loadaddr__, (size_t)&__data_size__);
+  memset(&__bss_start__, 0x00, (size_t)&__bss_size__);
+
+  malloc_init();
+
+  do_ctors();
+}
 
 void kern_main(void)
 {
-  int i;
-	bool val = true;
-  uint8_t *j;
+  bool val = true;
 
-  malloc_init();
-  j = new uint8_t;
+  cpp_runtime_enable();
 
-  *j = 5;
+  gpio.set_mode(5, stm32::Gpio::GpioOutput);
+  gpio.set_value(5, val);
 
-	gpio_set_mode(GpioBankA, 5, GpioOutput);
-	gpio_set_value(GpioBankA, 5, val);
-	i = 0;
-
-  delete j;
-
-	while (true)
-	{
-		i++;
-		if ((i % 50000) == 0) {
-			val = !val;
-			gpio_set_value(GpioBankA, 5, val);
-		}
-	}
+  int i =0;
+  while (true)
+  {
+    i++;
+    if ((i % 50000) == 0) {
+      val = !val;
+      gpio.set_value(5, val);
+    }
+  }
 }
